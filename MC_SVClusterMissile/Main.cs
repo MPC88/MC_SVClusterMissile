@@ -30,6 +30,7 @@ namespace MC_SVClusterMissile
             __state = true;
 
             // Only leave state true if Weapon.Fire will get as far as ProjectileControl.Fire call
+            // TODO: This probably needs tweaked or be separated for FireExtras.
             if ((!___isDrone && ___ss.energyMmt.valueMod(0) == 0f) || 
                 (__instance.chargeTime > 0f && !(___chargedFireCount > 0f)) || 
                 !(___currCoolDown <= 0f) || 
@@ -53,23 +54,15 @@ namespace MC_SVClusterMissile
         private static bool CanPayCost(Weapon instance, bool isDrone, SpaceShip ss, AmmoBuffer ammoBuffer, CargoSystem cs)
         {
             if (isDrone)
-            {
                 return true;
-            }
             if (instance.wRef.energyCost != 0f && instance.wRef.energyCost * ss.energyMmt.energyMod(0) > ss.stats.currEnergy)
-            {
                 return false;
-            }
             if (ammoBuffer != null && !CanPayAmmo(ammoBuffer, instance.wRef.ammo.qnt))
             {
                 if (cs == null || !CanReplicateAmmo(cs, instance.wRef.ammo.itemID, ss))
-                {
                     return false;
-                }
                 if (!CanPayAmmo(ammoBuffer, instance.wRef.ammo.qnt))
-                {
                     return false;
-                }
             }
             return true;
         }
@@ -80,18 +73,14 @@ namespace MC_SVClusterMissile
             {
                 AmmoBuffer_CargoSystem abcs = ammoBuffer as AmmoBuffer_CargoSystem;
                 if (abcs.qnt >= qntToPay)
-                {
                     return true;
-                }
                 return false;
             }
             else if (ammoBuffer is AmmoBuffer_ItemStock)
             {
                 AmmoBuffer_ItemStock abis = ammoBuffer as AmmoBuffer_ItemStock;
                 if (abis.isd != null && abis.isd.stock >= qntToPay)
-                {
                     return true;
-                }
                 return false;
             }
 
