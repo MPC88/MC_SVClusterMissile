@@ -23,14 +23,12 @@ namespace MC_SVClusterMissile
         }
 
         [HarmonyPatch(typeof(Weapon), nameof(Weapon.Fire))]
-        [HarmonyPatch(typeof(Weapon), "FireExtra")]
         [HarmonyPrefix]
         private static void WeaponFire_Pre(out bool __state, Weapon __instance, bool ___isDrone, SpaceShip ___ss, float ___currCoolDown, float ___chargedFireCount, AmmoBuffer ___ammoBuffer, CargoSystem ___cs)
         {
             __state = true;
 
             // Only leave state true if Weapon.Fire will get as far as ProjectileControl.Fire call
-            // TODO: This probably needs tweaked or be separated for FireExtras.
             if ((!___isDrone && ___ss.energyMmt.valueMod(0) == 0f) || 
                 (__instance.chargeTime > 0f && !(___chargedFireCount > 0f)) || 
                 !(___currCoolDown <= 0f) || 
@@ -39,17 +37,24 @@ namespace MC_SVClusterMissile
         }
 
         [HarmonyPatch(typeof(Weapon), nameof(Weapon.Fire))]
-        [HarmonyPatch(typeof(Weapon), "FireExtra")]
         [HarmonyPostfix]
         private static void WeaponFire_Post(Weapon __instance, ProjectileControl ___projControl, bool __state)
         {
             if (!__state)
                 return;
 
-            if (__instance.wRef.type == WeaponType.Missile)
-                // TODO: ___projControl == null in FireExtras
+            if (__instance.wRef.type == WeaponType.Missile)                
                 ___projControl.gameObject.AddComponent(typeof(ShotgunMissileControl));
         }
+
+        //[HarmonyPatch(typeof(Weapon), "FireExtra")]
+        //[HarmonyPostfix]
+        //private static void WeaponFireExtra_Post(Weapon __instance, ProjectileControl ___projControl)
+        //{
+        //    if (__instance.wRef.type == WeaponType.Missile)
+        //        // TODO: ___projControl == null in FireExtras
+        //        ___projControl.gameObject.AddComponent(typeof(ShotgunMissileControl));
+        //}
 
         private static bool CanPayCost(Weapon instance, bool isDrone, SpaceShip ss, AmmoBuffer ammoBuffer, CargoSystem cs)
         {

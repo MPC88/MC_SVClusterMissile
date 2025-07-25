@@ -9,7 +9,7 @@ namespace MC_SVClusterMissile
     class ShotgunMissileControl : MonoBehaviour
     {
         private const float DEPLOY_TIME = 3.0f;
-        private const float ARC = 270f;
+        private const float ARC = 20f;
         private const int NUMCHILDREN = 5;
 
         private static int projIndex = -1;
@@ -25,7 +25,7 @@ namespace MC_SVClusterMissile
             // Laser_Cyan, Plasma_Blast, Missle_1, Missle_2, Mine_1, Plasma_Torpedo, Quantum_Pulse,
             // Railgun_Bullet, Laser_Green, Orb
             if(projIndex == -1)
-                projIndex = GameManager.instance.GetProjectilePoolIndex("Missle_1");
+                projIndex = GameManager.instance.GetProjectilePoolIndex("Cannon_Bullet");
         }
 
         public void Start()
@@ -91,7 +91,7 @@ namespace MC_SVClusterMissile
             Rigidbody originalRB = (Rigidbody)AccessTools.Field(typeof(ProjectileControl), "rb").GetValue(originalProjCont);
             projControl.SetRbVelocity(originalRB.velocity);
 
-            ApplyProjectileMods_Missile(projControl);
+            //ApplyProjectileMods_Missile(projControl);
 
             projControl.Fire();
         }
