@@ -19,8 +19,6 @@ namespace MC_SVClusterMissile
         private static FieldInfo iEnumWeaponField = null;
         private static FieldInfo wepProjContField = null;
 
-        private static int num = 0;
-
         public void Awake()
         {
             Harmony.CreateAndPatchAll(typeof(Main));

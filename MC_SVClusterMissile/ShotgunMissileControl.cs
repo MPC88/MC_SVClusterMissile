@@ -71,14 +71,14 @@ namespace MC_SVClusterMissile
             projControl.impact = originalProjCont.impact;
             projControl.speed = originalProjCont.speed;
                         
-            float newProxDmgMod = (float)AccessTools.FieldRefAccess<float>(typeof(ProjectileControl), "proximityDmgMod")(projControl);
+            float newProxDmgMod = AccessTools.FieldRefAccess<float>(typeof(ProjectileControl), "proximityDmgMod")(projControl);
             newProxDmgMod = (float)AccessTools.Field(typeof(ProjectileControl), "proximityDmgMod").GetValue(originalProjCont);
             if (newProxDmgMod != 0f)
             {
-                Vector3 newSpawnPos = (Vector3)AccessTools.FieldRefAccess<Vector3>(typeof(ProjectileControl), "spawnPosition")(projControl);
+                Vector3 newSpawnPos = AccessTools.FieldRefAccess<Vector3>(typeof(ProjectileControl), "spawnPosition")(projControl);
                 newSpawnPos = base.transform.position;
 
-                float newMaxRange = (float)AccessTools.FieldRefAccess<float>(typeof(ProjectileControl), "maxRange")(projControl);
+                float newMaxRange = AccessTools.FieldRefAccess<float>(typeof(ProjectileControl), "maxRange")(projControl);
                 newMaxRange = (float)AccessTools.Field(typeof(ProjectileControl), "maxRange").GetValue(originalProjCont);
             }
 
