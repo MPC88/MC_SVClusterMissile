@@ -1,8 +1,10 @@
 ﻿using BepInEx;
 using HarmonyLib;
-using System.Collections.Generic;
+using System;
+using System.Collections;
+using System.Diagnostics;
+using System.Reflection;
 using UnityEngine;
-using UnityEngine.Purchasing;
 
 namespace MC_SVClusterMissile
 {
@@ -13,6 +15,9 @@ namespace MC_SVClusterMissile
         public const string pluginGuid = "mc.starvalor.clustermissile";
         public const string pluginName = "SV Cluster Missile";
         public const string pluginVersion = "0.0.1";
+
+        private static FieldInfo iEnumWeaponField = null;
+        private static FieldInfo wepProjContField = null;
 
         private static int num = 0;
 
@@ -29,9 +34,9 @@ namespace MC_SVClusterMissile
             __state = true;
 
             // Only leave state true if Weapon.Fire will get as far as ProjectileControl.Fire call
-            if ((!___isDrone && ___ss.energyMmt.valueMod(0) == 0f) || 
-                (__instance.chargeTime > 0f && !(___chargedFireCount > 0f)) || 
-                !(___currCoolDown <= 0f) || 
+            if ((!___isDrone && ___ss.energyMmt.valueMod(0) == 0f) ||
+                (__instance.chargeTime > 0f && !(___chargedFireCount > 0f)) ||
+                !(___currCoolDown <= 0f) ||
                 !CanPayCost(__instance, ___isDrone, ___ss, ___ammoBuffer, ___cs))
                 __state = false;
         }
@@ -43,18 +48,53 @@ namespace MC_SVClusterMissile
             if (!__state)
                 return;
 
-            if (__instance.wRef.type == WeaponType.Missile)                
+            if (__instance.wRef.type == WeaponType.Missile)
                 ___projControl.gameObject.AddComponent(typeof(ShotgunMissileControl));
         }
 
-        //[HarmonyPatch(typeof(Weapon), "FireExtra")]
-        //[HarmonyPostfix]
-        //private static void WeaponFireExtra_Post(Weapon __instance, ProjectileControl ___projControl)
-        //{
-        //    if (__instance.wRef.type == WeaponType.Missile)
-        //        // TODO: ___projControl == null in FireExtras
-        //        ___projControl.gameObject.AddComponent(typeof(ShotgunMissileControl));
-        //}
+        [HarmonyPatch(typeof(Weapon), "FireExtra")]
+        [HarmonyPostfix]
+        static IEnumerator MyWrapper(IEnumerator __result)
+        {
+            // Run original enumerator code
+            while (__result.MoveNext())
+                yield return __result;
+
+            if (iEnumWeaponField == null)
+            {
+                Type ienumType = __result.GetType();
+                foreach (FieldInfo fi in ienumType.GetFields())
+                {
+                    if (fi.FieldType == typeof(Weapon))
+                    {
+                        iEnumWeaponField = fi;
+                        break;
+                    }
+                }
+            }
+
+            if (iEnumWeaponField != null)
+            {
+                Weapon weaponFieldVal = (Weapon)iEnumWeaponField.GetValue(__result);
+
+                if (wepProjContField == null)
+                {
+                    foreach (FieldInfo fi in weaponFieldVal.GetType().GetFields(AccessTools.all))
+                    {
+                        UnityEngine.Debug.Log(fi.Name + " - " + fi.FieldType);
+                        if (fi.FieldType == typeof(ProjectileControl))
+                        {
+                            wepProjContField = fi;
+                            UnityEngine.Debug.Log("Found");
+                        }
+                    }
+                }
+                
+                ProjectileControl projControl = (ProjectileControl)wepProjContField.GetValue(weaponFieldVal);
+                if (weaponFieldVal.wRef.type == WeaponType.Missile)
+                    projControl.gameObject.AddComponent(typeof(ShotgunMissileControl));
+            }
+        }
 
         private static bool CanPayCost(Weapon instance, bool isDrone, SpaceShip ss, AmmoBuffer ammoBuffer, CargoSystem cs)
         {
