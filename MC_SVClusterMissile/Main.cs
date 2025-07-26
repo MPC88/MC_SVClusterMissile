@@ -81,12 +81,8 @@ namespace MC_SVClusterMissile
                 {
                     foreach (FieldInfo fi in weaponFieldVal.GetType().GetFields(AccessTools.all))
                     {
-                        UnityEngine.Debug.Log(fi.Name + " - " + fi.FieldType);
                         if (fi.FieldType == typeof(ProjectileControl))
-                        {
                             wepProjContField = fi;
-                            UnityEngine.Debug.Log("Found");
-                        }
                     }
                 }
                 
