@@ -5,37 +5,40 @@ using UnityEngine.UIElements;
 using HarmonyLib;
 using System.Collections;
 using System.Diagnostics;
+using System.Reflection;
 
 namespace MC_SVClusterMissile
 {
     class ShotgunMissileControl : MonoBehaviour
     {
+        // Projectile names
+        // Bullet, Laser_Blue, Cannon_Bullet, Bullet, Laser_Red, Laser_Purple, Laser_Green,
+        // Laser_Cyan, Plasma_Blast, Missle_1, Missle_2, Mine_1, Plasma_Torpedo, Quantum_Pulse,
+        // Railgun_Bullet, Laser_Green, Orb
+        private const string PROJECTILE = "Cannon_Bullet";
         private const float DEPLOY_TIME = 3.0f;
         private const float ARC = 20f;
         private const int NUMCHILDREN = 5;
 
+        private static FieldInfo projContEntityField = AccessTools.Field(typeof(ProjectileControl), "Entity");
+        private static FieldInfo projContProxDmgModField = AccessTools.Field(typeof(ProjectileControl), "proximityDmgMod");
+        private static FieldInfo projContSpawnPos = AccessTools.Field(typeof(ProjectileControl), "spawnPosition");
+        private static FieldInfo projContMaxRange = AccessTools.Field(typeof(ProjectileControl), "maxRange");
         private static int projIndex = -1;
 
-        internal new bool enabled = false;
-        internal float elapsedTime = 0;
-
-        private ProjectileControl originalProjCont;        
+        private float elapsedTime = 0;
+        private ProjectileControl originalProjCont;     
 
         public void Awake()
-        {
-            // Projectile names
-            // Bullet, Laser_Blue, Cannon_Bullet, Bullet, Laser_Red, Laser_Purple, Laser_Green,
-            // Laser_Cyan, Plasma_Blast, Missle_1, Missle_2, Mine_1, Plasma_Torpedo, Quantum_Pulse,
-            // Railgun_Bullet, Laser_Green, Orb
+        {            
             if(projIndex == -1)
-                projIndex = GameManager.instance.GetProjectilePoolIndex("Cannon_Bullet");
+                projIndex = GameManager.instance.GetProjectilePoolIndex(PROJECTILE);
         }
 
         public void Reset()
         {
             originalProjCont = this.gameObject.GetComponent<ProjectileControl>();
             elapsedTime = 0;
-            enabled = true;
         }
 
         public void Update()
@@ -57,7 +60,7 @@ namespace MC_SVClusterMissile
                     rotOffset += ARC/NUMCHILDREN;
                 }
                 if (originalProjCont.hasEntity)
-                    ((Entity)AccessTools.Field(typeof(ProjectileControl), "entity").GetValue(originalProjCont)).Die();
+                    ((Entity)projContEntityField.GetValue(originalProjCont)).Die();
                 else
                     originalProjCont.DisableAndHide();
             }
@@ -81,16 +84,13 @@ namespace MC_SVClusterMissile
             projControl.tDmg = originalProjCont.tDmg;
             projControl.impact = originalProjCont.impact;
             projControl.speed = originalProjCont.speed;
-                        
-            float newProxDmgMod = AccessTools.FieldRefAccess<float>(typeof(ProjectileControl), "proximityDmgMod")(projControl);
-            newProxDmgMod = (float)AccessTools.Field(typeof(ProjectileControl), "proximityDmgMod").GetValue(originalProjCont);
+
+            float newProxDmgMod = (float)projContProxDmgModField.GetValue(originalProjCont);
+            projContProxDmgModField.SetValue(projControl, newProxDmgMod);
             if (newProxDmgMod != 0f)
             {
-                Vector3 newSpawnPos = AccessTools.FieldRefAccess<Vector3>(typeof(ProjectileControl), "spawnPosition")(projControl);
-                newSpawnPos = base.transform.position;
-
-                float newMaxRange = AccessTools.FieldRefAccess<float>(typeof(ProjectileControl), "maxRange")(projControl);
-                newMaxRange = (float)AccessTools.Field(typeof(ProjectileControl), "maxRange").GetValue(originalProjCont);
+                projContSpawnPos.SetValue(projControl, projContSpawnPos.GetValue(originalProjCont));
+                projContMaxRange.SetValue(projControl, projContMaxRange.GetValue(originalProjCont));
             }
 
             //projControl.timeToDestroy = originalProjCont.timeToDestroy;
@@ -126,7 +126,6 @@ namespace MC_SVClusterMissile
             ShotgunMissileControl smc = __instance.gameObject.GetComponent<ShotgunMissileControl>();
             if (smc != null)
                 Object.Destroy(smc);
-                //smc.enabled = false;
         }
     }
 }

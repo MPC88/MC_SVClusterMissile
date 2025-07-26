@@ -55,7 +55,7 @@ namespace MC_SVClusterMissile
 
             if (__instance.wRef.type == WeaponType.Missile)
             {
-                ShotgunMissileControl smc = ___projControl.GetComponent<ShotgunMissileControl>() ?? (ShotgunMissileControl)___projControl.gameObject.AddComponent(typeof(ShotgunMissileControl));
+                ShotgunMissileControl smc = (ShotgunMissileControl)(___projControl.GetComponent<ShotgunMissileControl>() ?? ___projControl.gameObject.AddComponent(typeof(ShotgunMissileControl)));
                 smc.Reset();
             }
         }
@@ -89,9 +89,13 @@ namespace MC_SVClusterMissile
 
                 if (weaponFieldVal.wRef.type == WeaponType.Missile)
                 {
-                    ShotgunMissileControl smc = projControl.GetComponent<ShotgunMissileControl>() ?? (ShotgunMissileControl)projControl.gameObject.AddComponent(typeof(ShotgunMissileControl));
+                    ShotgunMissileControl smc = (ShotgunMissileControl)(projControl.GetComponent<ShotgunMissileControl>() ?? projControl.gameObject.AddComponent(typeof(ShotgunMissileControl)));
                     smc.Reset();
                 }
+            }
+            else
+            {
+                UnityEngine.Debug.Log("Null enum Weapon field");
             }
         }
 
