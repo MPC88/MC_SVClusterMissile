@@ -19,7 +19,7 @@ namespace MC_SVClusterMissile
         internal static bool allowClusterThisFrame = true;
 
         private static FieldInfo iEnumWeaponField = null;
-        private static FieldInfo wepProjContField = null;
+        private static FieldInfo wepProjContField = typeof(Weapon).GetField("projControl", AccessTools.all);
 
         public void Awake()
         {
@@ -85,27 +85,12 @@ namespace MC_SVClusterMissile
             {
                 Weapon weaponFieldVal = (Weapon)iEnumWeaponField.GetValue(__result);
 
-                if (wepProjContField == null)
-                {
-                    foreach (FieldInfo fi in weaponFieldVal.GetType().GetFields(AccessTools.all))
-                    {
-                        if (fi.FieldType == typeof(ProjectileControl))
-                        {
-                            wepProjContField = fi;
-                            break;
-                        }
-                    }
-                }
+                ProjectileControl projControl = (ProjectileControl)wepProjContField.GetValue(weaponFieldVal);
 
-                if (wepProjContField != null)
+                if (weaponFieldVal.wRef.type == WeaponType.Missile)
                 {
-                    ProjectileControl projControl = (ProjectileControl)wepProjContField.GetValue(weaponFieldVal);
-
-                    if (weaponFieldVal.wRef.type == WeaponType.Missile)
-                    {
-                        ShotgunMissileControl smc = projControl.GetComponent<ShotgunMissileControl>() ?? (ShotgunMissileControl)projControl.gameObject.AddComponent(typeof(ShotgunMissileControl));
-                        smc.Reset();
-                    }
+                    ShotgunMissileControl smc = projControl.GetComponent<ShotgunMissileControl>() ?? (ShotgunMissileControl)projControl.gameObject.AddComponent(typeof(ShotgunMissileControl));
+                    smc.Reset();
                 }
             }
         }
