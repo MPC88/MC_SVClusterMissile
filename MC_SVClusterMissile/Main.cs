@@ -80,7 +80,10 @@ namespace MC_SVClusterMissile
                     foreach (FieldInfo fi in weaponFieldVal.GetType().GetFields(AccessTools.all))
                     {
                         if (fi.FieldType == typeof(ProjectileControl))
+                        {
                             wepProjContField = fi;
+                            break;
+                        }
                     }
                 }
 
