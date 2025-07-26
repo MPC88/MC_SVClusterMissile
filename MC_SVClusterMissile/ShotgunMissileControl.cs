@@ -19,14 +19,11 @@ namespace MC_SVClusterMissile
         private static FieldInfo projContProxDmgModField = AccessTools.Field(typeof(ProjectileControl), "proximityDmgMod");
         private static FieldInfo projContSpawnPos = AccessTools.Field(typeof(ProjectileControl), "spawnPosition");
         private static FieldInfo projContMaxRange = AccessTools.Field(typeof(ProjectileControl), "maxRange");
-        private static int projIndex = -1;
-
+        
         private float elapsedTime = 0;
 
         public void Reset()
         {
-            if (projIndex == -1)
-                projIndex = GameManager.instance.GetProjectilePoolIndex(PROJECTILE);
             elapsedTime = 0;
         }
 
@@ -40,11 +37,12 @@ namespace MC_SVClusterMissile
                 Main.allowClusterThisFrame = false;
 
                 ProjectileControl originalProjCont = this.gameObject.GetComponent<ProjectileControl>();
-                
+                int projIndex = GameManager.instance.GetProjectilePoolIndex(PROJECTILE);
+
                 float rotOffset = 0 - (ARC/2);                
                 for (int i = 0; i < NUMCHILDREN; i++)
                 {
-                    SpawnChildProjectile(originalProjCont, Vector3.zero, rotOffset);
+                    SpawnChildProjectile(originalProjCont, projIndex, Vector3.zero, rotOffset);
                     rotOffset += ARC/NUMCHILDREN;
                 }
 
@@ -55,10 +53,10 @@ namespace MC_SVClusterMissile
             }
         }
 
-        private void SpawnChildProjectile(ProjectileControl originalProjCont, Vector3 posOffset, float rotOffset)
+        private void SpawnChildProjectile(ProjectileControl originalProjCont, int projIndex, Vector3 posOffset, float rotOffset)
         {
             Vector3 pos = originalProjCont.gameObject.transform.position + posOffset;
-            GameObject gameObject = GameManager.instance.SpawnProjectile(ShotgunMissileControl.projIndex, pos, originalProjCont.gameObject.transform.rotation);
+            GameObject gameObject = GameManager.instance.SpawnProjectile(projIndex, pos, originalProjCont.gameObject.transform.rotation);
             gameObject.transform.Rotate(new Vector3(0, 1, 0), rotOffset);
             ProjectileControl projControl = gameObject.GetComponent<ProjectileControl>();
 
