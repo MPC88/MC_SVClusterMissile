@@ -16,6 +16,8 @@ namespace MC_SVClusterMissile
         public const string pluginName = "SV Cluster Missile";
         public const string pluginVersion = "0.0.1";
 
+        internal static bool allowClusterThisFrame = true;
+
         private static FieldInfo iEnumWeaponField = null;
         private static FieldInfo wepProjContField = null;
 
@@ -23,6 +25,11 @@ namespace MC_SVClusterMissile
         {
             Harmony.CreateAndPatchAll(typeof(Main));
             Harmony.CreateAndPatchAll(typeof(ShotgunMissileControl));
+        }
+
+        public void LateUpdate()
+        {
+            allowClusterThisFrame = true;
         }
 
         [HarmonyPatch(typeof(Weapon), nameof(Weapon.Fire))]
@@ -47,7 +54,10 @@ namespace MC_SVClusterMissile
                 return;
 
             if (__instance.wRef.type == WeaponType.Missile)
-                ___projControl.gameObject.AddComponent(typeof(ShotgunMissileControl));
+            {
+                ShotgunMissileControl smc = ___projControl.GetComponent<ShotgunMissileControl>() ?? (ShotgunMissileControl)___projControl.gameObject.AddComponent(typeof(ShotgunMissileControl));
+                smc.Reset();
+            }
         }
 
         [HarmonyPatch(typeof(Weapon), "FireExtra")]
@@ -90,8 +100,12 @@ namespace MC_SVClusterMissile
                 if (wepProjContField != null)
                 {
                     ProjectileControl projControl = (ProjectileControl)wepProjContField.GetValue(weaponFieldVal);
+
                     if (weaponFieldVal.wRef.type == WeaponType.Missile)
-                        projControl.gameObject.AddComponent(typeof(ShotgunMissileControl));
+                    {
+                        ShotgunMissileControl smc = projControl.GetComponent<ShotgunMissileControl>() ?? (ShotgunMissileControl)projControl.gameObject.AddComponent(typeof(ShotgunMissileControl));
+                        smc.Reset();
+                    }
                 }
             }
         }

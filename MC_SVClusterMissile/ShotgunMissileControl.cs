@@ -3,6 +3,8 @@ using static UnityEngine.GraphicsBuffer;
 using UnityEngine.SocialPlatforms;
 using UnityEngine.UIElements;
 using HarmonyLib;
+using System.Collections;
+using System.Diagnostics;
 
 namespace MC_SVClusterMissile
 {
@@ -14,6 +16,7 @@ namespace MC_SVClusterMissile
 
         private static int projIndex = -1;
 
+        internal new bool enabled = false;
         internal float elapsedTime = 0;
 
         private ProjectileControl originalProjCont;        
@@ -28,18 +31,26 @@ namespace MC_SVClusterMissile
                 projIndex = GameManager.instance.GetProjectilePoolIndex("Cannon_Bullet");
         }
 
-        public void Start()
+        public void Reset()
         {
             originalProjCont = this.gameObject.GetComponent<ProjectileControl>();
             elapsedTime = 0;
+            enabled = true;
         }
 
         public void Update()
         {
+            if (!enabled)
+                return;
+
             elapsedTime += Time.deltaTime;
             if(elapsedTime >= DEPLOY_TIME)
             {
-                float rotOffset = 0 - (ARC/2);
+                if (!Main.allowClusterThisFrame)
+                    return;
+                Main.allowClusterThisFrame = false;
+
+                float rotOffset = 0 - (ARC/2);                
                 for (int i = 0; i < NUMCHILDREN; i++)
                 {
                     SpawnChildProjectile(Vector3.zero, rotOffset);
@@ -82,8 +93,10 @@ namespace MC_SVClusterMissile
                 newMaxRange = (float)AccessTools.Field(typeof(ProjectileControl), "maxRange").GetValue(originalProjCont);
             }
 
-            projControl.timeToDestroy = originalProjCont.timeToDestroy;
-            projControl.explodeOnDestroy = originalProjCont.explodeOnDestroy;
+            //projControl.timeToDestroy = originalProjCont.timeToDestroy;
+            //projControl.explodeOnDestroy = originalProjCont.explodeOnDestroy;
+            projControl.timeToDestroy = Random.Range(1.5f, 1.7f);
+            projControl.explodeOnDestroy = true;
             projControl.damageType = originalProjCont.damageType;
             projControl.ownerSS = originalProjCont.ownerSS;
             projControl.canHitProjectiles = originalProjCont.canHitProjectiles;
@@ -113,6 +126,7 @@ namespace MC_SVClusterMissile
             ShotgunMissileControl smc = __instance.gameObject.GetComponent<ShotgunMissileControl>();
             if (smc != null)
                 Object.Destroy(smc);
+                //smc.enabled = false;
         }
     }
 }
