@@ -85,10 +85,13 @@ namespace MC_SVClusterMissile
                             wepProjContField = fi;
                     }
                 }
-                
-                ProjectileControl projControl = (ProjectileControl)wepProjContField.GetValue(weaponFieldVal);
-                if (weaponFieldVal.wRef.type == WeaponType.Missile)
-                    projControl.gameObject.AddComponent(typeof(ShotgunMissileControl));
+
+                if (wepProjContField != null)
+                {
+                    ProjectileControl projControl = (ProjectileControl)wepProjContField.GetValue(weaponFieldVal);
+                    if (weaponFieldVal.wRef.type == WeaponType.Missile)
+                        projControl.gameObject.AddComponent(typeof(ShotgunMissileControl));
+                }
             }
         }
 
