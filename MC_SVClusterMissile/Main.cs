@@ -103,7 +103,7 @@ namespace MC_SVClusterMissile
                 return false;
             if (ammoBuffer != null && !CanPayAmmo(ammoBuffer, instance.wRef.ammo.qnt))
             {
-                if (cs == null || !CanReplicateAmmo(cs, instance.wRef.ammo.itemID, ss))
+                if (cs == null || !CanReplicateAmmo(cs, ss))
                     return false;
                 if (!CanPayAmmo(ammoBuffer, instance.wRef.ammo.qnt))
                     return false;
@@ -131,7 +131,7 @@ namespace MC_SVClusterMissile
             return false;
         }
 
-        private static bool CanReplicateAmmo(CargoSystem cs, int ammoID, SpaceShip ss)
+        private static bool CanReplicateAmmo(CargoSystem cs, SpaceShip ss)
         {
             if (ss.stats.modelData.manufacturer != TFaction.Miners)
                 return false;
