@@ -54,7 +54,7 @@ namespace MC_SVClusterMissile
 
         [HarmonyPatch(typeof(Weapon), "FireExtra")]
         [HarmonyPostfix]
-        static IEnumerator MyWrapper(IEnumerator __result)
+        static IEnumerator FireExtraIEnumerator_Post(IEnumerator __result)
         {
             // Run original enumerator code
             while (__result.MoveNext())
