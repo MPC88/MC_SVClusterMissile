@@ -19,16 +19,23 @@ namespace MC_SVClusterMissile
         private static FieldInfo projContProxDmgModField = AccessTools.Field(typeof(ProjectileControl), "proximityDmgMod");
         private static FieldInfo projContSpawnPos = AccessTools.Field(typeof(ProjectileControl), "spawnPosition");
         private static FieldInfo projContMaxRange = AccessTools.Field(typeof(ProjectileControl), "maxRange");
-        
+
+        internal new bool enabled = false;
+
         private float elapsedTime = 0;
+        private int projIndex = -1;
 
         public void Reset()
         {
             elapsedTime = 0;
+            enabled = true;
         }
 
         public void Update()
         {
+            if (!enabled)
+                return;
+
             elapsedTime += Time.deltaTime;
             if(elapsedTime >= DEPLOY_TIME)
             {
@@ -37,23 +44,24 @@ namespace MC_SVClusterMissile
                 Main.allowClusterThisFrame = false;
 
                 ProjectileControl originalProjCont = this.gameObject.GetComponent<ProjectileControl>();
-                int projIndex = GameManager.instance.GetProjectilePoolIndex(PROJECTILE);
+                if(projIndex == -1)
+                    projIndex = GameManager.instance.GetProjectilePoolIndex(PROJECTILE);
 
                 float rotOffset = 0 - (ARC/2);                
                 for (int i = 0; i < NUMCHILDREN; i++)
                 {
-                    SpawnChildProjectile(originalProjCont, projIndex, Vector3.zero, rotOffset);
+                    SpawnChildProjectile(originalProjCont, Vector3.zero, rotOffset);
                     rotOffset += ARC/NUMCHILDREN;
                 }
 
                 if (originalProjCont.hasEntity)
                     ((Entity)projContEntityField.GetValue(originalProjCont)).Die();
                 else
-                    originalProjCont.DisableAndHide();
+                    originalProjCont.DisableAndHide();                
             }
         }
 
-        private void SpawnChildProjectile(ProjectileControl originalProjCont, int projIndex, Vector3 posOffset, float rotOffset)
+        private void SpawnChildProjectile(ProjectileControl originalProjCont, Vector3 posOffset, float rotOffset)
         {
             Vector3 pos = originalProjCont.gameObject.transform.position + posOffset;
             GameObject gameObject = GameManager.instance.SpawnProjectile(projIndex, pos, originalProjCont.gameObject.transform.rotation);
@@ -94,18 +102,18 @@ namespace MC_SVClusterMissile
             projControl.homing = originalProjCont.homing;
             projControl.autoTargeting = originalProjCont.autoTargeting;
 
-            projControl.Fire();
+            projControl.Fire();            
         }
 
         [HarmonyPatch(typeof(ProjectileControl), nameof(ProjectileControl.DisableAndHide))]
         [HarmonyPrefix]
         private static void ProjContDisableHide_Pre(ProjectileControl __instance)
         {
-            // Remove this component before projectile is added back into object pool and
+            // Disable this component before projectile is added back into object pool and
             // before gameobject is disabled.
             ShotgunMissileControl smc = __instance.gameObject.GetComponent<ShotgunMissileControl>();
             if (smc != null)
-                Object.Destroy(smc);
+                smc.enabled = false;
         }
     }
 }

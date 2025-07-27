@@ -54,7 +54,7 @@ namespace MC_SVClusterMissile
 
             if (__instance.wRef.type == WeaponType.Missile)
             {
-                ShotgunMissileControl smc = (ShotgunMissileControl)___projControl.gameObject.AddComponent(typeof(ShotgunMissileControl));
+                ShotgunMissileControl smc = (ShotgunMissileControl)(___projControl.gameObject.GetComponent<ShotgunMissileControl>() ?? ___projControl.gameObject.AddComponent(typeof(ShotgunMissileControl)));
                 smc.Reset();
             }
         }
@@ -87,7 +87,7 @@ namespace MC_SVClusterMissile
                 if (weaponFieldVal.wRef.type == WeaponType.Missile)
                 {
                     ProjectileControl projControl = (ProjectileControl)wepProjContField.GetValue(weaponFieldVal);
-                    ShotgunMissileControl smc = (ShotgunMissileControl)projControl.gameObject.AddComponent(typeof(ShotgunMissileControl));
+                    ShotgunMissileControl smc = (ShotgunMissileControl)(projControl.gameObject.GetComponent<ShotgunMissileControl>() ?? projControl.gameObject.AddComponent(typeof(ShotgunMissileControl)));
                     smc.Reset();
                 }
             }
