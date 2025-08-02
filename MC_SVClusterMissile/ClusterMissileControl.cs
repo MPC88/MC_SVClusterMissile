@@ -88,8 +88,8 @@ namespace MC_SVClusterMissile
                 projContMaxRange.SetValue(projControl, projContMaxRange.GetValue(originalProjCont));
             }
 
-            //projControl.timeToDestroy = originalProjCont.timeToDestroy;
-            projControl.timeToDestroy = 3;
+            projControl.timeToDestroy = originalProjCont.timeToDestroy;
+            //projControl.timeToDestroy = 3;
             projControl.explodeOnDestroy = originalProjCont.explodeOnDestroy;
             //projControl.timeToDestroy = Random.Range(1.5f, 1.7f);
             //projControl.explodeOnDestroy = true;

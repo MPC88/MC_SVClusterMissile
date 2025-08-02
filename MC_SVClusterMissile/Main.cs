@@ -167,7 +167,7 @@ namespace MC_SVClusterMissile
         // Method called by GetProjPoolInd_Trans
         private static void IncreaseInstancedProjectiles(ProjPool pool)
         {
-            pool.preInstances = 5000; // Default is 20
+            pool.preInstances = 1000; // Default is 20
         }
 
         //and the fun part....
