@@ -167,7 +167,7 @@ namespace MC_SVClusterMissile
         // Method called by GetProjPoolInd_Trans
         private static void IncreaseInstancedProjectiles(ProjPool pool)
         {
-            pool.preInstances = 500; // Default is 20
+            pool.preInstances = 5000; // Default is 20
         }
 
         //and the fun part....
@@ -188,7 +188,7 @@ namespace MC_SVClusterMissile
                 new CodeMatch(OpCodes.Call, AccessTools.Method(typeof(ObjManager), nameof(ObjManager.GetProj))),
                 new CodeMatch(OpCodes.Ldarg_0),
                 new CodeMatch(OpCodes.Ldfld, AccessTools.Field(typeof(GameManager), "projObjGroup")),
-                new CodeMatch(OpCodes.Newobj, typeof(ProjPool)),
+                new CodeMatch(OpCodes.Newobj),
                 new CodeMatch(OpCodes.Stloc_1)
             };
 
