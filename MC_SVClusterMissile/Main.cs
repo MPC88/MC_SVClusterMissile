@@ -164,6 +164,7 @@ namespace MC_SVClusterMissile
         /*************************************
          * Projectile pool fuckery
          *************************************/
+        // Method called by GetProjPoolInd_Trans
         private static void IncreaseInstancedProjectiles(ProjPool pool)
         {
             pool.preInstances = 500;
