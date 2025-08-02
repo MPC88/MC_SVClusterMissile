@@ -89,9 +89,10 @@ namespace MC_SVClusterMissile
             }
 
             //projControl.timeToDestroy = originalProjCont.timeToDestroy;
-            //projControl.explodeOnDestroy = originalProjCont.explodeOnDestroy;
-            projControl.timeToDestroy = Random.Range(1.5f, 1.7f);
-            projControl.explodeOnDestroy = true;
+            projControl.timeToDestroy = 3;
+            projControl.explodeOnDestroy = originalProjCont.explodeOnDestroy;
+            //projControl.timeToDestroy = Random.Range(1.5f, 1.7f);
+            //projControl.explodeOnDestroy = true;
             projControl.damageType = originalProjCont.damageType;
             projControl.ownerSS = originalProjCont.ownerSS;
             projControl.canHitProjectiles = originalProjCont.canHitProjectiles;
