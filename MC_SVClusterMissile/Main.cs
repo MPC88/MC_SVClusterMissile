@@ -18,7 +18,8 @@ namespace MC_SVClusterMissile
         public const string pluginName = "SV Cluster Missile";
         public const string pluginVersion = "0.0.1";
 
-        internal static bool allowClusterThisFrame = true;
+        internal const int maxClusterPerFrame = 3;
+        internal static int clustersThisFrame = 0;
 
         private static FieldInfo iEnumWeaponField = null;
         private static FieldInfo wepProjContField = typeof(Weapon).GetField("projControl", AccessTools.all);
@@ -31,7 +32,7 @@ namespace MC_SVClusterMissile
 
         public void LateUpdate()
         {
-            allowClusterThisFrame = true;
+            clustersThisFrame = 0;
         }
 
         [HarmonyPatch(typeof(Weapon), nameof(Weapon.Fire))]

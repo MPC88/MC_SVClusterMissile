@@ -39,9 +39,9 @@ namespace MC_SVClusterMissile
             elapsedTime += Time.deltaTime;
             if(elapsedTime >= DEPLOY_TIME)
             {
-                if (!Main.allowClusterThisFrame)
-                    return;
-                Main.allowClusterThisFrame = false;
+                //if (Main.clustersThisFrame >= Main.maxClusterPerFrame)
+                //    return;
+                //Main.clustersThisFrame++;
 
                 ProjectileControl originalProjCont = this.gameObject.GetComponent<ProjectileControl>();
                 if(projIndex == -1)
