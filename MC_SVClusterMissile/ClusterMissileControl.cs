@@ -4,7 +4,7 @@ using System.Reflection;
 
 namespace MC_SVClusterMissile
 {
-    class ShotgunMissileControl : MonoBehaviour
+    class ClusterMissileControl : MonoBehaviour
     {
         // Projectile names
         // Bullet, Laser_Blue, Cannon_Bullet, Bullet, Laser_Red, Laser_Purple, Laser_Green,
@@ -111,7 +111,7 @@ namespace MC_SVClusterMissile
         {
             // Disable this component before projectile is added back into object pool and
             // before gameobject is disabled.
-            ShotgunMissileControl smc = __instance.gameObject.GetComponent<ShotgunMissileControl>();
+            ClusterMissileControl smc = __instance.gameObject.GetComponent<ClusterMissileControl>();
             if (smc != null)
                 smc.enabled = false;
         }

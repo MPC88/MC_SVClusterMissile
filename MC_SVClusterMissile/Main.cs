@@ -2,8 +2,11 @@
 using HarmonyLib;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Reflection;
+using System.Reflection.Emit;
 using UnityEngine;
+using UnityEngine.Purchasing;
 
 namespace MC_SVClusterMissile
 {
@@ -22,8 +25,8 @@ namespace MC_SVClusterMissile
 
         public void Awake()
         {
-            Harmony.CreateAndPatchAll(typeof(Main));
-            Harmony.CreateAndPatchAll(typeof(ShotgunMissileControl));
+            Harmony harmInst = Harmony.CreateAndPatchAll(typeof(Main));
+            Harmony.CreateAndPatchAll(typeof(ClusterMissileControl));
         }
 
         public void LateUpdate()
@@ -49,47 +52,61 @@ namespace MC_SVClusterMissile
         [HarmonyPostfix]
         private static void WeaponFire_Post(Weapon __instance, ProjectileControl ___projControl, bool __state)
         {
-            if (!__state)
-                return;
+            if (__state)
+                AddClusterMissileControl(__instance, ___projControl);
+        }
 
-            if (__instance.wRef.type == WeaponType.Missile)
+        // This method is called from FireExtraMoveNext_Trans
+        private static void FireExtraAddComponent(Weapon weapon)
+        {            
+            AddClusterMissileControl(weapon, (ProjectileControl)wepProjContField.GetValue(weapon));
+        }
+
+        private static void AddClusterMissileControl(Weapon weapon, ProjectileControl projControl)
+        {
+            if (weapon.wRef.type == WeaponType.Missile)
             {
-                ShotgunMissileControl smc = (ShotgunMissileControl)(___projControl.gameObject.GetComponent<ShotgunMissileControl>() ?? ___projControl.gameObject.AddComponent(typeof(ShotgunMissileControl)));
-                smc.Reset();
+                ClusterMissileControl cmc = (ClusterMissileControl)(projControl.gameObject.GetComponent<ClusterMissileControl>() ?? projControl.gameObject.AddComponent(typeof(ClusterMissileControl)));
+                cmc.Reset();
             }
         }
 
-        [HarmonyPatch(typeof(Weapon), "FireExtra")]
-        [HarmonyPostfix]
-        static IEnumerator FireExtraIEnumerator_Post(IEnumerator __result)
+        [HarmonyPatch(typeof(Weapon), "FireExtra", MethodType.Enumerator)]
+        [HarmonyTranspiler]
+        static IEnumerable<CodeInstruction> FireExtraMoveNext_Trans(IEnumerable<CodeInstruction> instructions)
         {
-            // Run original enumerator code
-            while (__result.MoveNext())
-                yield return __result;
+            // Using CodeMatcher instead of manipulating the instructions directly, but that is also an option.
+            var codeMatcher = new CodeMatcher(instructions);
 
-            if (iEnumWeaponField == null)
+            //IL_03c7: ldloc.1
+            //IL_03c8: callvirt instance void Weapon::ApplyProjectileMods()
+            CodeMatch[] toMatch = new CodeMatch[]
             {
-                Type ienumType = __result.GetType();
-                foreach (FieldInfo fi in ienumType.GetFields())
-                {
-                    if (fi.FieldType == typeof(Weapon))
-                    {
-                        iEnumWeaponField = fi;
-                        break;
-                    }
-                }
+                new CodeMatch(OpCodes.Ldloc_1),
+                new CodeMatch(OpCodes.Callvirt, AccessTools.Method(typeof(Weapon), "ApplyProjectileMods"))
+            };
+
+            CodeInstruction[] newInstructions = new CodeInstruction[]
+            {
+                new CodeInstruction(OpCodes.Ldloc_1),
+                new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Main), "FireExtraAddComponent")),
+            };
+
+            // Match the provided CodeMatch's, stopping at the last instruction of the match, or out of bounds if no match is found.
+            codeMatcher.MatchEndForward(toMatch);
+
+            if (!codeMatcher.IsInvalid)
+            {
+                // Add instructions right *after* find.
+                codeMatcher.Advance(1);
+                codeMatcher.Insert(newInstructions);
+
+                return codeMatcher.InstructionEnumeration();
             }
-
-            if (iEnumWeaponField != null)
+            else
             {
-                Weapon weaponFieldVal = (Weapon)iEnumWeaponField.GetValue(__result);
-
-                if (weaponFieldVal.wRef.type == WeaponType.Missile)
-                {
-                    ProjectileControl projControl = (ProjectileControl)wepProjContField.GetValue(weaponFieldVal);
-                    ShotgunMissileControl smc = (ShotgunMissileControl)(projControl.gameObject.GetComponent<ShotgunMissileControl>() ?? projControl.gameObject.AddComponent(typeof(ShotgunMissileControl)));
-                    smc.Reset();
-                }
+                Debug.Log("Cluster missile: Transpiler failed");
+                return instructions;
             }
         }
 
